@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>myMemoPad</title>
+<script src="js/jquery-2.1.3.min.js"></script>
+<link rel="stylesheet" href="css/sample.css">
+</head>
+<body>
+<header>
+<h1>MemoPad</h1>
+<h2>search
+    <input type="text" id="search--key">
+</h2>
+</header>
+<main>
+    <input type="text" id="key">
+    <textarea id="memo"></textarea>
+    <ul>
+        <li id="search">Search</li>
+        <li id="save">Save</li>
+        <li id="clear">Clear</li>
+        <li id="allclear">Allclear</li>
+    </ul>
+</main>
+<table id="list">
+<!-- ここに追加データが挿入される -->
+</table>
+<script>
+
+$('#search--key').focus();//検索フォーカス
+
+//0. Search クリックイベント
+$("#search").on("click",function(){
+ 
+    //フォームの中身をからっぽにする
+    $("#key").val("");
+    $("#memo").val("");
+    let searchflg = 0;
+
+    const seachkey = $("#search--key").val();//画面検索key
+
+    // console.log(seachkey); 
+    // 検索ＫＥＹ判定
+    if(seachkey == ""){
+            alert('SearchするKeyを入力ください');
+            $('#search--key').focus();//検索フォーカス
+    }else{
+ 
+        for(let i=0; i<localStorage.length; i++){
+            const key   = localStorage.key(i);
+            const value = localStorage.getItem(key);
+    
+            // console.log(value); 
+        
+            // 見つかれば表示
+            if(key == seachkey){
+                $("#key").val(key);//画面key戻し
+                $("#memo").val(value);//画面memo戻し
+                searchflg = 1;
+            }
+        }
+    }
+
+    // console.log(searchflg); 
+
+    // 該当なし
+    if((searchflg == 0)&&(seachkey != "")){
+            alert('該当するものが見つかりません');
+            $('#search--key').focus();//検索フォーカス
+    } 
+});
+
+
+//1.Save クリックイベント
+$("#save").on("click",function(){
+
+    const key = $("#key").val();//画面key取得
+    const memo = $("#memo").val();//画面memo取得
+    
+    //必須チェック
+    if(key == ""){
+        alert('KEYは必須です');
+    }else{
+        
+        //登録確認
+        var result = window.confirm('登録しても良いですか？');
+        
+        if (result){
+            localStorage.setItem(key,memo);//ローカル上書き保存
+            read();//readをcall
+            formclear();//フォームの中身をからっぽにする
+        }
+     }
+     $('#key').focus();// ＫＥＹにフォーカス
+ });
+
+//2.clear クリックイベント
+$("#clear").on("click",function(){
+
+    //ローカルストレージのデータを1件削除
+    const key = $("#key").val();//画面key取得
+
+    // ＫＥＹ判定
+    if(key == ""){
+        alert('削除するKeyを入力ください');
+    }else{
+        //削除確認
+        var result = window.confirm('削除しても良いですか？');
+        
+        if (result){        
+            localStorage.removeItem(key);
+            read();//readをcall
+            formclear();//フォームの中身をからっぽにする
+        }
+    }
+    $('#key').focus();// ＫＥＹにフォーカス
+});
+
+
+//3.Allclear クリックイベント
+$("#allclear").on("click",function(){
+
+    //削除確認
+    var result = window.confirm('注意！！　全件削除しても良いですか？');
+
+    if (result){        
+        //ローカルストレージのデータを削除
+        localStorage.clear();
+
+        //HTMLのデータも削除
+        $("#list").empty();
+    }    
+    $('#search--key').focus();//検索フォーカス
+})
+
+
+//4.ページ読み込み：保存データ取得表示
+function read(){
+
+    //HTMLのデータも削除
+    $("#list").empty();
+
+    for(let i=0; i<localStorage.length; i++){
+
+        //ローカルストレージ内のi番目のkeyを取得
+        const key =localStorage.key(i);
+
+        //ローカルストレージ内のi番目のmemoを取得
+        const memo =localStorage.getItem(key);
+
+        //テンプレートリテラルで表示
+        let html = `
+            <tr>
+                <th>${key}</th>
+                <td>${memo}</td>
+            </tr>
+        `;
+        $("#list").append(html);//画面表示
+    }
+}
+
+//5.フォームクリア
+function formclear(){
+    //フォームの中身をからっぽにする
+    $("#key").val("");
+    $("#memo").val("");
+    $("#search--key").val("");
+}
+
+</script>
+<footer><small>G's</small></footer>
+</body>
+</html>
